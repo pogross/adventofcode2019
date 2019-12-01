@@ -7,35 +7,32 @@ def _parse_module_mass() -> List[int]:
         return [int(value) for value in f.readlines()]
 
 
-def required_fuel_per_mass(mass: int) -> int:
+def fuel_per_mass(mass: int) -> int:
     return floor(mass / 3) - 2
 
 
-def total_fuel_modules_only() -> int:
+def total_fuel_modules_only(masses: List[int] = _parse_module_mass()) -> int:
     """Considers only the module mass"""
-    return sum(required_fuel_per_mass(mass) for mass in _parse_module_mass())
+    return sum(fuel_per_mass(mass) for mass in masses)
 
 
-def required_extra_fuel(base_fuel) -> Generator[int, None, None]:
-    """Generator that yields fuel required for every extra fuel chunk"""
-    fuel_chunk = required_fuel_per_mass(base_fuel)
+def fuel_for_module_and_fuel(mass) -> int:
+    """Considers module mass and fuel mass"""
+    total = 0
+    fuel_chunk = fuel_per_mass(mass)
 
     while fuel_chunk > 0:
-        yield fuel_chunk
-        fuel_chunk = required_fuel_per_mass(fuel_chunk)
+        total += fuel_chunk
+        fuel_chunk = fuel_per_mass(fuel_chunk)
+
+    return total
 
 
-def total_fuel_payload() -> int:
+def total_fuel_modules_and_fuel(masses: List[int] = _parse_module_mass()) -> int:
     """Considers module mass and fuel mass"""
-    total_fuel = 0
-    for mass in _parse_module_mass():
-        base_fuel = required_fuel_per_mass(mass)
-        extra_fuel = sum(required_extra_fuel(base_fuel))
-        total_fuel += base_fuel + extra_fuel
-
-    return total_fuel
+    return sum(fuel_for_module_and_fuel(mass) for mass in masses)
 
 
 if __name__ == "__main__":
     print(f"For all the modules we need {total_fuel_modules_only()} units of fuel.")
-    print(f"The total payload requires {total_fuel_payload()} units of fuel.")
+    print(f"The total payload requires {total_fuel_modules_and_fuel()} units of fuel.")
